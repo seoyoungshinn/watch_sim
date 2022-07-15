@@ -262,11 +262,11 @@ class DoRetrofitActivity : Activity(){
                                 var routeString = routeBuilder.toString()
                                 publish("route",routeString)
 
-                                var min = scoreList[0]
+                                var max = scoreList[0]
                                 var ind = 0
                                 for (i in 1..3) {
-                                    if (scoreList[i] < min) {
-                                        min = scoreList[i]
+                                    if (scoreList[i] > max) {
+                                        max = scoreList[i]
                                         ind++
                                     }
                                 }
