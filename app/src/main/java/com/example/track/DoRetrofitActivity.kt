@@ -34,8 +34,8 @@ class DoRetrofitActivity : Activity(){
 
     //안전할 길 점수 받을 배열
     //private var scoreList = arrayListOf<Double>()
-    //private var scoreList = arrayListOf<SaftyScore?>()
-    private var scoreList = Array<SaftyScore?>(4){null}
+    private var scoreList = arrayListOf<SaftyScore?>()
+    //private var scoreList = Array<SaftyScore?>(4){null}
 
     //searchOption 목록
     private var safeList = listOf(0,4,10,30)
@@ -156,6 +156,7 @@ class DoRetrofitActivity : Activity(){
                         timer(period = 500,initialDelay = 500){
                             if(timercount!=4){
                                 getScore(lon,lat,destinationPoint[1],destinationPoint[0],startname,endname,safeList[timercount],timercount)
+
                                 timercount++
                                 getscorecount++
                             }
@@ -244,26 +245,25 @@ class DoRetrofitActivity : Activity(){
 
                         if (getscorecount == 4 && errorcount != 0) {  // 4번 돌았는데 403에러가 1개라도 있었다면
                             Log.d(LOG, "DoRetrofit - ROUTE API 403에러 - getScore")
-                            //scoreList.clear()
+                            scoreList.clear()
                             getscorecount = 0
                             errorcount = 0
                             getPOI(sttResultMsg, lat, lon)
                         } else {
-                            scoreList[getscorecount]=saftyScore
+                            scoreList.add(saftyScore)
                             Log.d(SCORE_SAFEROUTE, "scoreList : " + "${saftyScore}")
-                            //Log.d(SCORE_SAFEROUTE,"scoreList : ")
+                            //경로 배열에 경로의 모든 정보 추가
 
-                            /////////////////////////////////////여기까지돌아감 0718/15pm
+
+
+
                             if (scoreList.size ==4)  {
-                                Log.d(SCORE_SAFEROUTE, "111111111111111111111" )
+
                                 var routeString = routeBuilder.toString()
                                 publish("route",routeString)
 
-                                Log.d(SCORE_SAFEROUTE, "${scoreList[0]}" )
                                 Log.d(SCORE_SAFEROUTE, "${saftyScore}" )
-                                //여기가 문제인데 왜그러냐면 scoreList배열에 받아온 saftyScore가 저장이 안됨
-                                //saftyScore는 받아오는거 확인함. 배열에 저장이 안되는거임
-                                //여기 고쳐야함
+                                //경로 배열내 4가지(전부임)경로 모두 프린트(정보)
 
 
                                 var max = scoreList[0]?.score!!
@@ -300,7 +300,7 @@ class DoRetrofitActivity : Activity(){
                             Log.d(LOG,"DoRetrofit - ROUTE API 403에러 - getScore")
                             getscorecount=0
                             errorcount=0
-                            //scoreList.clear()
+                            scoreList.clear()
                             getPOI(sttResultMsg,lat,lon)
                         }
                     }
@@ -317,7 +317,7 @@ class DoRetrofitActivity : Activity(){
 
 
 
-        //scoreList.clear() //안전한 길에서 빠져나와 getRoute를 호출했으면 초기화
+        scoreList.clear() //안전한 길에서 빠져나와 getRoute를 호출했으면 초기화
 
         getscorecount = 0
         errorcount = 0

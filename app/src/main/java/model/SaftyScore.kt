@@ -9,7 +9,7 @@ data class SaftyScore(var score:Double?, var turnPoint:Int?, var elevator:Int?,
                       var overPasses:Int?, var underPasses:Int?, var stairs:Int?,
                       var largeFacilitypassage:Int?, var totalDistance: Int?
 ): Serializable {
-/*    init{
+    init{
         score = 0.0
         turnPoint = 0
         elevator = 0
@@ -21,10 +21,10 @@ data class SaftyScore(var score:Double?, var turnPoint:Int?, var elevator:Int?,
         roadTypeLength4 =0.0
         bridge= 0
         turnnels = 0
-        Highroad = 0
+        highroad = 0
         overPasses = 0
         underPasses = 0
         stairs = 0
         largeFacilitypassage = 0
-    }*/
+    }
 }
