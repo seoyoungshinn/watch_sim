@@ -9,12 +9,14 @@ import android.view.WindowManager
 import com.example.track.databinding.ActivityMainBinding
 import com.google.gson.Gson
 import model.NaviData
+import model.SaftyScore
 import retrofit.RetrofitManager
 import route.DetailRoute
 import utils.Constant
 import utils.Constant.API.LOG
 import utils.Constant.API.SCORE_SAFEROUTE
 import kotlin.concurrent.timer
+
 
 class DoRetrofitActivity : Activity(){
 
@@ -31,7 +33,9 @@ class DoRetrofitActivity : Activity(){
     private var routeBuilder = StringBuilder()
 
     //안전할 길 점수 받을 배열
-    private var scoreList = arrayListOf<Double>()
+    //private var scoreList = arrayListOf<Double>()
+    //private var scoreList = arrayListOf<SaftyScore?>()
+    private var scoreList = Array<SaftyScore?>(4){null}
 
     //searchOption 목록
     private var safeList = listOf(0,4,10,30)
@@ -188,7 +192,7 @@ class DoRetrofitActivity : Activity(){
             startname = startname,
             endname = endname,
             searchOption = searchOption,
-            completion = { responseState, parseRouteDataArray, score ->
+            completion = { responseState, parseRouteDataArray, saftyScore ->
                 when (responseState) {
                     Constant.RESPONSE_STATE.OKAY -> {  //만약 STATE가 OKEY라면
 
@@ -236,37 +240,38 @@ class DoRetrofitActivity : Activity(){
                         if (tcount < 3 ){
                             routeBuilder.append("!")
                         }
-//
-//                        var routeString = routeBuilder.toString()
 
-//                        if (tcount == 0) {
-//                            publish("topic","4가지 경로입니다")
-//                            publish("route_start", routeString)
-//                            Log.d(LOG, "route_start : " + "${routeString}")
-//                        } else {
-//                            publish("route", routeString)
-//                            Log.d(LOG, "route : " + "${routeString}")
-//                        }
 
                         if (getscorecount == 4 && errorcount != 0) {  // 4번 돌았는데 403에러가 1개라도 있었다면
                             Log.d(LOG, "DoRetrofit - ROUTE API 403에러 - getScore")
-                            scoreList.clear()
+                            //scoreList.clear()
                             getscorecount = 0
                             errorcount = 0
                             getPOI(sttResultMsg, lat, lon)
                         } else {
-                            scoreList.add(score)
-                            Log.d(SCORE_SAFEROUTE, "scoreList : " + "${scoreList}")
+                            scoreList[getscorecount]=saftyScore
+                            Log.d(SCORE_SAFEROUTE, "scoreList : " + "${saftyScore}")
                             //Log.d(SCORE_SAFEROUTE,"scoreList : ")
-                            if (scoreList.size == 4) {
+
+                            /////////////////////////////////////여기까지돌아감 0718/15pm
+                            if (scoreList.size ==4)  {
+                                Log.d(SCORE_SAFEROUTE, "111111111111111111111" )
                                 var routeString = routeBuilder.toString()
                                 publish("route",routeString)
 
-                                var max = scoreList[0]
+                                Log.d(SCORE_SAFEROUTE, "${scoreList[0]}" )
+                                Log.d(SCORE_SAFEROUTE, "${saftyScore}" )
+                                //여기가 문제인데 왜그러냐면 scoreList배열에 받아온 saftyScore가 저장이 안됨
+                                //saftyScore는 받아오는거 확인함. 배열에 저장이 안되는거임
+                                //여기 고쳐야함
+
+
+                                var max = scoreList[0]?.score!!
+
                                 var ind = 0
                                 for (i in 1..3) {
-                                    if (scoreList[i] > max) {
-                                        max = scoreList[i]
+                                    if (scoreList[i]?.score!! > max) {
+                                        max = scoreList[i]?.score!!
                                         ind=i
                                     }
                                 }
@@ -295,7 +300,7 @@ class DoRetrofitActivity : Activity(){
                             Log.d(LOG,"DoRetrofit - ROUTE API 403에러 - getScore")
                             getscorecount=0
                             errorcount=0
-                            scoreList.clear()
+                            //scoreList.clear()
                             getPOI(sttResultMsg,lat,lon)
                         }
                     }
@@ -312,7 +317,7 @@ class DoRetrofitActivity : Activity(){
 
 
 
-        scoreList.clear() //안전한 길에서 빠져나와 getRoute를 호출했으면 초기화
+        //scoreList.clear() //안전한 길에서 빠져나와 getRoute를 호출했으면 초기화
 
         getscorecount = 0
         errorcount = 0
@@ -337,7 +342,7 @@ class DoRetrofitActivity : Activity(){
             startname = startname,
             endname = endname,
             searchOption = searchOption,
-            completion = { responseState, parseRouteDataArray, score ->
+            completion = { responseState, parseRouteDataArray, saftyScore ->
                 when (responseState) {
                     Constant.RESPONSE_STATE.OKAY -> {  //만약 STATE가 OKEY라면
                         if (parseRouteDataArray != null) {
@@ -373,29 +378,6 @@ class DoRetrofitActivity : Activity(){
                         rawRouteRes.add(arrayListOf(endx,endy))
 
 
-//                        var routeResBuilder = StringBuilder()
-//
-//                        // x좌표 다 넣기
-//                        for (i in rawRouteRes.indices) {
-//                            routeResBuilder.append(rawRouteRes[i][1].toString())
-//                            if (i < rawRouteRes.size-1){
-//                                routeResBuilder.append(",")
-//                            }
-//                        }
-//
-//                        //y좌표 다 스트링으로 만듬
-//                        routeResBuilder.append("/")
-//                        for (i in rawRouteRes.indices) {
-//                            routeResBuilder.append(rawRouteRes[i][0].toString())
-//                            if (i < rawRouteRes.size-1){
-//                                routeResBuilder.append(",")
-//                            }
-//                        }
-//
-//                        var routeResString = routeResBuilder.toString()
-//
-//                        publish("route_res",routeResString)
-//                        Log.d(LOG,"routeRes : "+"${routeResString}")
 
                         //UI에 나오는 거리 계산을 위해 분기점 좌표만 얻는 중
                         for( i in turnTypeList.indices){
@@ -404,34 +386,7 @@ class DoRetrofitActivity : Activity(){
                             }
                         }
 
-//                        var size=0
-//
-//                        //중간좌표를 얻음.
-//                        for (i in rawRouteRes.indices) {
-//                            if (i < rawRouteRes.size-1) {
-//                                midpointList.add(listOf(rawRouteRes[i][1], rawRouteRes[i][0]))
-//                                size = midpointList.size
-//                                midpointList = DetailRoute.midPoint(
-//                                    rawRouteRes[i][1],
-//                                    rawRouteRes[i][0],
-//                                    rawRouteRes[i + 1][1],
-//                                    rawRouteRes[i + 1][0],
-//                                    midpointList
-//                                )
-//                                for (j in size..midpointList.size - 1) {
-//                                    turnTypeList.add(j, 0)
-//                                }
-//                            }
-//
-//                            else {
-//                                midpointList.add(  //맨 마지막 값 넣기
-//                                    listOf(
-//                                        rawRouteRes[i][1],
-//                                        rawRouteRes[i][0]
-//                                    )
-//                                )
-//                            }
-//                        }
+
                         var routeResBuilder = StringBuilder()
 
                         // x좌표 다 넣기
@@ -477,7 +432,9 @@ class DoRetrofitActivity : Activity(){
         Log.d(LOG,"DoRetrofit - retrunMain호출")
         val returnintent = Intent()
         returnintent.putExtra("naviData",naviDataItem)
-        setResult(RESULT_OK,returnintent)
+                setResult(RESULT_OK,returnintent)
         finish()
     }
 }
+
+
