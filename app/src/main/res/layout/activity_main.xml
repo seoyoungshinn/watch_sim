@@ -12,6 +12,5 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:scaleType="fitXY"
-            android:src="@drawable/main"
-            />
+            android:src="@drawable/watchout_3" />
 </androidx.wear.widget.BoxInsetLayout>
